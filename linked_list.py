@@ -166,9 +166,3 @@ ll.append("e")
 print(ll)
 ll[2] = "g"
 print(ll)
-# ll.insert("6", 5)
-# ll.insert("6", 2)
-# ll.insert("6", 0)
-# print(ll)
-
-
