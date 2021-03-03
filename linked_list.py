@@ -1,4 +1,7 @@
 from typing import Any, Optional
+import sys
+import weakref
+import copy
 
 
 class Node:
@@ -22,42 +25,42 @@ class Node:
 
 
 class DoubleNode(Node):
-    def __init__(
-            self, data: Any, next_node: Optional["Node"] = None, prev_node: Optional["Node"] = None
-    ):
+    def __init__(self, data: Any, next_node: Optional["Node"] = None, prev_node: Optional["Node"] = None):
         super().__init__(data, next_node)
         self.prev_node = prev_node
 
-    def __str__(self):
-        return f"[{self.data}]"
-
     @property
     def prev_node(self):
+        # if self._prev_node is not None:
+        #     return self._prev_node()
+        # else:
         return self._prev_node
 
     @prev_node.setter
     def prev_node(self, value):
         if value is not None and not isinstance(value, Node):
             raise ValueError
-
-        self._prev_node = value
+        if value is not None:
+            self._prev_node = weakref.ref(value)
+        else:
+            self._prev_node = value
 
 
 # не используется
-class LinkedListIterator:
-    def __init__(self, head):
-        self.current = head
-
-    def __next__(self):
-        if self.current is None:
-            raise StopIteration
-
-        node = self.current
-        self.current = self.current.next_node
-        return node.data
-
-    def __iter__(self):
-        return self
+# class LinkedListIterator:
+#     def __init__(self, head):
+#         self.current = head
+#
+#     def __next__(self):
+#         if self.current is None:
+#             raise StopIteration
+#
+#         node = self.current
+#         self.current = self.current.next_node
+#         return node.data
+#
+#     def __iter__(self):
+#         return self
 
 
 class LinkedList:
@@ -157,12 +160,61 @@ class LinkedList:
                     node.next_node = node.next_node.next_node
 
 
-ll = LinkedList()
-ll.append("a")
-ll.append("b")
-ll.append("c")
-ll.append("d")
-ll.append("e")
-print(ll)
-ll[2] = "g"
-print(ll)
+class DoubleLinkedList(LinkedList):
+    def __init__(self):
+        super().__init__()
+        self.tail = None
+
+    def __str__(self):
+        return "<->".join(str(node) for node in self._node_iter())
+
+    def append(self, data: Any):
+        new_node = DoubleNode(data)
+
+        for current_node in self._node_iter():
+            if current_node.next_node is None:  # tail!
+                current_node.next_node = new_node
+                new_node.prev_node = current_node
+                self.tail = new_node
+                break
+        else:
+            self.head = new_node
+            self.tail = new_node
+
+        self._size += 1
+
+    def clear(self):
+        super().clear()
+        self.tail = None
+
+    def insert(self, data, index=0):
+        if index < 0 or index > self._size:
+            raise ValueError
+
+        new_node = DoubleNode(data)
+        self._size += 1
+        if index == 0:
+            new_node.next_node = self.head
+            self.head.prev_node = new_node
+            self.head = new_node
+        else:
+            for i, node in enumerate(self._node_iter()):
+                if i == index - 1:
+                    new_node.next_node = node.next_node
+                    node.next_node = new_node
+                    new_node.prev_node = node
+
+    def delete(self, index: int):
+        if index < 0 or index >= self._size:
+            raise ValueError
+
+        self._size -= 1
+        if index == 0:
+            self.head = self.head.next_node
+            if self.head is not None:
+                self.head.prev_node = None
+        else:
+            for i, node in enumerate(self._node_iter()):
+                if i == index - 1:
+                    node.next_node = node.next_node.next_node
+                    node.prev_node = node
