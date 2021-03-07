@@ -170,17 +170,13 @@ class DoubleLinkedList(LinkedList):
 
     def append(self, data: Any):
         new_node = DoubleNode(data)
-
-        for current_node in self._node_iter():
-            if current_node.next_node is None:  # tail!
-                current_node.next_node = new_node
-                new_node.prev_node = current_node
-                self.tail = new_node
-                break
-        else:
+        if len(self) == 0:
             self.head = new_node
             self.tail = new_node
-
+        else:
+            self.tail.next_node = new_node
+            new_node.prev_node = self.tail
+            self.tail = new_node
         self._size += 1
 
     def clear(self):
@@ -203,6 +199,8 @@ class DoubleLinkedList(LinkedList):
                     new_node.next_node = node.next_node
                     node.next_node = new_node
                     new_node.prev_node = node
+                    node.next_node = new_node
+                    break
 
     def delete(self, index: int):
         if index < 0 or index >= self._size:
@@ -213,6 +211,8 @@ class DoubleLinkedList(LinkedList):
             self.head = self.head.next_node
             if self.head is not None:
                 self.head.prev_node = None
+            else:
+                self.tail = None
         else:
             for i, node in enumerate(self._node_iter()):
                 if i == index - 1:
