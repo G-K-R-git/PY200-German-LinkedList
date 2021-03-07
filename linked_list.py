@@ -31,10 +31,10 @@ class DoubleNode(Node):
 
     @property
     def prev_node(self):
-        # if self._prev_node is not None:
-        #     return self._prev_node()
-        # else:
-        return self._prev_node
+        if self._prev_node is not None:
+            return self._prev_node()
+        else:
+            return self._prev_node
 
     @prev_node.setter
     def prev_node(self, value):

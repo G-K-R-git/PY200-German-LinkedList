@@ -8,12 +8,14 @@ ll_ref = linked_list.LinkedList()
 ll_ref.append(1)
 ll_ref.append(2)
 ll_ref.append(3)
+ll_ref.append(4)
 
 
 dll_ref = linked_list.DoubleLinkedList()
 dll_ref.append(1)
 dll_ref.append(2)
 dll_ref.append(3)
+dll_ref.append(4)
 
 
 def test_init_node():
@@ -31,13 +33,14 @@ def test_init_double_node():
 def test_reference_ll():
     ll = copy.deepcopy(ll_ref)
     assert [sys.getrefcount(ll.head), sys.getrefcount(ll.head.next_node),
-            sys.getrefcount(ll.head.next_node.next_node)] == [2, 2, 2]
+            sys.getrefcount(ll.head.next_node.next_node),
+            sys.getrefcount(ll.head.next_node.next_node.next_node)] == [2, 2, 2, 2]
 
 
 def test_reference_dll():
     dll = copy.deepcopy(dll_ref)
     assert [sys.getrefcount(dll.head), sys.getrefcount(dll.head.next_node),
-            sys.getrefcount(dll.head.next_node.next_node)] == [2, 2, 3]
+            sys.getrefcount(dll.head.next_node.next_node), sys.getrefcount(dll.tail)] == [2, 2, 2, 3]
     assert str(dll.head) == str(f"({dll[0]})")
     assert dll.head.prev_node is None
 
@@ -48,12 +51,12 @@ def test_str_node():
 
 def test_str():
     ll = copy.deepcopy(ll_ref)
-    assert str(ll) == "(1)->(2)->(3)"
+    assert str(ll) == "(1)->(2)->(3)->(4)"
 
 
 def test_str_dll():
     dll = copy.deepcopy(dll_ref)
-    assert str(dll) == "(1)<->(2)<->(3)"
+    assert str(dll) == "(1)<->(2)<->(3)<->(4)"
 
 
 def test_getitem():
@@ -167,3 +170,11 @@ def test_index():
     assert ll.index(2) == 1
     with pytest.raises(ValueError):
         ll.index(-1)
+
+def test_next_prev():
+    ll = copy.deepcopy(ll_ref)
+    dll = copy.deepcopy(dll_ref)
+    assert ll.head.next_node.data == ll[1]
+    assert dll.head.prev_node == None
+    assert dll.tail.next_node == None
+    assert dll.tail.prev_node.data == dll[2]
